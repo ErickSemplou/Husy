@@ -234,6 +234,38 @@ object SoundEffectsManager {
         }
     }
 
+    /**
+     * Plays a simple pleasant relaxing ambient background melody (flute/chime sequence)
+     */
+    fun playAmbientMelody() {
+        if (!_isSoundEnabled.value) return
+        scope.launch {
+            val sampleRate = 22050
+            val durationMs = 2800
+            val numSamples = (sampleRate * durationMs) / 1000
+            val buffer = ShortArray(numSamples)
+
+            val notes = doubleArrayOf(261.63, 293.66, 329.63, 392.00, 440.00, 392.00, 329.63, 293.66, 261.63)
+            val noteDuration = 0.3
+
+            for (i in 0 until numSamples) {
+                val t = i.toDouble() / sampleRate
+                var sum = 0.0
+                notes.forEachIndexed { idx, freq ->
+                    val noteStart = idx * noteDuration
+                    if (t >= noteStart && t < noteStart + noteDuration + 0.1) {
+                        val noteT = t - noteStart
+                        val env = exp(-noteT * 4.0) * sin(PI * (noteT / noteDuration)).coerceIn(0.0, 1.0)
+                        sum += (sin(2.0 * PI * freq * noteT) + 0.3 * sin(4.0 * PI * freq * noteT)) * env * 0.25
+                    }
+                }
+                val sample = (sum * Short.MAX_VALUE).toInt().coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt())
+                buffer[i] = sample.toShort()
+            }
+            playPcmBuffer(buffer, sampleRate)
+        }
+    }
+
     private fun playPcmBuffer(buffer: ShortArray, sampleRate: Int) {
         try {
             val minBufferSize = AudioTrack.getMinBufferSize(

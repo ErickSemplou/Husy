@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Refresh
@@ -108,6 +110,7 @@ fun EvolutionGameApp(
     val isSoundOn by SoundEffectsManager.isSoundEnabled.collectAsState()
     var showResetDialog by remember { mutableStateOf(false) }
     var showTribeRenameDialog by remember { mutableStateOf(false) }
+    var showAuthorDialog by remember { mutableStateOf(false) }
     var renameInput by remember { mutableStateOf(state.progress.tribeName) }
 
     // Ascension Celebration Modal
@@ -202,6 +205,46 @@ fun EvolutionGameApp(
         )
     }
 
+    // Author Info Dialog
+    if (showAuthorDialog) {
+        AlertDialog(
+            onDismissRequest = { showAuthorDialog = false },
+            title = {
+                Text(
+                    text = "Про автора",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = AmberFirePrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "Автор: Сергій Стадник",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = BoneIvory,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Історична стратегія-симулятор еволюції людини та витоків цивілізації.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.LightGray
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showAuthorDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = AmberFirePrimary)
+                ) {
+                    Text("Зрозуміло", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = CaveStoneSurface
+        )
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
@@ -232,6 +275,22 @@ fun EvolutionGameApp(
                     }
                 },
                 actions = {
+                    // Author Badge Button
+                    IconButton(
+                        onClick = { showAuthorDialog = true },
+                        modifier = Modifier.testTag("author_info_button")
+                    ) {
+                        Icon(Icons.Default.Person, contentDescription = "Автор проєкту", tint = AmberFirePrimary)
+                    }
+
+                    // Melody Button
+                    IconButton(
+                        onClick = { SoundEffectsManager.playAmbientMelody() },
+                        modifier = Modifier.testTag("play_melody_button")
+                    ) {
+                        Icon(Icons.Default.MusicNote, contentDescription = "Грати мелодію", tint = BoneIvory)
+                    }
+
                     // Sound Toggle Button
                     IconButton(
                         onClick = {
